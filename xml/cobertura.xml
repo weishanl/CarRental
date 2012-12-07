@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cobertura" default="coverage-report">
+
+	<property name="cobertura.dir" value="C:/libs/cobertura-1.8" />
+
+	<path id="cobertura.classpath">
+		<fileset dir="${cobertura.dir}">
+			<include name="cobertura.jar" />
+			<include name="lib/**/*.jar" />
+		</fileset>
+	</path>
+
+	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+
+	<target name="init">
+		<property name="base.dir" value=".." />
+		<property name="cobertura.out.dir" value="${base.dir}/cobertura_results" />
+		<property name="cobertura.datafile" value="${cobertura.out.dir}/cobertura.ser" />
+
+		<delete dir="${cobertura.out.dir}" quiet="true" />
+		<mkdir dir="${cobertura.out.dir}" />
+
+		<property name="classes.dir" value="${cobertura.out.dir}/instrumented-classes" />
+		<property name="testreport.dir" value="${cobertura.out.dir}/reports" />
+		<property name="spring.jar" value="C:/libs/spring-framework-2.0-rc2/dist/spring.jar" />
+		<property name="spring.lib" value="C:/libs/spring-framework-2.0-rc2/lib" />
+		<property name="aspectj.lib" value="C:/libs/aspectj/lib" />
+		<property name="loggingutil.dir" value="C:/workspaces/CarRentalExample/LoggingUtils" />
+
+	</target>
+
+	<target name="instrument" depends="init">
+		<cobertura-instrument todir="${classes.dir}" datafile="${cobertura.datafile}">
+			<classpath refid="cobertura.classpath" />
+			<classpath location="${spring.lib}/log4j/log4j-1.2.13.jar" />
+			<instrumentationClasspath>
+				<pathelement location="${base.dir}/bin" />
+			</instrumentationClasspath>
+
+			<includeClasses regex="vehicle.*" />
+			<excludeClasses regex="org.*" />
+		</cobertura-instrument>
+	</target>
+
+	<target name="cover-test" depends="instrument">
+		<mkdir dir="${testreport.dir}/junit" />
+		<junit dir="${cobertura.out.dir}" maxmemory="512m" failureproperty="test.failure" printSummary="withOutAndErr" fork="true" showoutput="yes" forkmode="once" haltonerror="true">
+			<formatter type="plain" />
+			<classpath refid="cobertura.classpath" />
+			<classpath location="${loggingutil.dir}/bin" />
+			<classpath location="${classes.dir}" />
+			<classpath location="${coberutra.lib}" />
+			<classpath location="${aspectj.lib}/aspectjlib.jar" />
+			<classpath location="${aspectj.lib}/aspectjrt.jar" />
+			<classpath location="${aspectj.lib}/aspectjweaver.jar" />
+			<classpath location="${spring.jar}" />
+			<classpath location="${spring.lib}/jakarta-commons/commons-logging.jar" />
+			<classpath location="${spring.lib}/log4j/log4j-1.2.13.jar" />
+			<classpath location="${base.dir}/bin/" />
+			<batchtest todir="${testreport.dir}/junit">
+				<fileset dir="${base.dir}/bin/">
+					<include name="**/*Test.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="coverage-report" depends="cover-test">
+		<cobertura-report destdir="${testreport.dir}" datafile="${cobertura.datafile}">
+			<fileset dir="${base.dir}/src">
+				<include name="**/*.java" />
+			</fileset>
+			<fileset dir="${base.dir}/test">
+				<include name="**/*.java" />
+			</fileset>
+		</cobertura-report>
+	</target>
+</project>

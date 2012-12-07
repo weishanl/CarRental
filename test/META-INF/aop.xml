@@ -1,0 +1,8 @@
+<aspectj>
+	<aspects>
+		<aspect name="test.timingaspect.TestMethodTimingAspect"/>
+	</aspects>
+	<weaver>
+		<include within="vehicle..*"/>
+	</weaver>
+</aspectj>

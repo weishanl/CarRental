@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="emma_run" default="run">
+
+	<property name="emma.dir" value="C:/libs/emma-2.0.5312/lib" />
+
+	<path id="emma.lib">
+		<pathelement location="${emma.dir}/emma.jar" />
+		<pathelement location="${emma.dir}/emma_ant.jar" />
+	</path>
+
+	<taskdef resource="emma_ant.properties" classpathref="emma.lib" />
+
+	<target name="init">
+		<property name="base.dir" value="C:/workspaces/CarRentalExample/CarRental" />
+		<property name="bin.dir" value="${base.dir}/bin" />
+		<property name="emmaresults.dir" value="${base.dir}/emma_results" />
+		<delete dir="${emmaresults.dir}/_files" quiet="true" />
+		<mkdir dir="${emmaresults.dir}/_files" />
+		<property name="testreport.dir" value="${emmaresults.dir}/reports" />
+		<delete dir="{testreport.dir}" quiet="true"/>
+		<mkdir dir="${testreport.dir}" />
+		<property name="spring.jar" value="C:/libs/spring-framework-2.0-rc2/dist/spring.jar" />
+		<property name="spring.lib" value="C:/libs/spring-framework-2.0-rc2/lib" />
+		<property name="aspectj.lib" value="C:/libs/aspectj/lib" />
+
+		<property name="loggingutil.dir" value="C:/workspaces/CarRentalExample/LoggingUtils" />
+		<property name="src.dir" value="${base.dir}/src" />
+		<property name="test.dir" value="${base.dir}/test" />
+
+		<path id="run.classpath">
+			<pathelement location="${bin.instr.dir}" />
+			<pathelement location="${bin.dir}" />
+			<pathelement location="${loggingutil.dir}/bin" />
+			<pathelement location="${aspectj.lib}/aspectjlib.jar" />
+			<pathelement location="${aspectj.lib}/aspectjrt.jar" />
+			<pathelement location="${aspectj.lib}/aspectjweaver.jar" />
+			<pathelement location="${spring.jar}" />
+			<pathelement location="${spring.lib}/jakarta-commons/commons-logging.jar" />
+			<pathelement location="${spring.lib}/log4j/log4j-1.2.13.jar" />
+		</path>
+	</target>
+
+	<target name="emma" depends="init" description="turns on EMMA instrumentation/reporting">
+		<property name="emma.enabled" value="true" />
+		<property name="out.instr.dir" value="${emmaresults.dir}/bin_instr" />
+	</target>
+
+	<target name="run" depends="init, emma" description="runs the examples">
+		<emma enabled="${emma.enabled}">
+			<instr instrpathref="run.classpath" destdir="${out.instr.dir}" metadatafile="${emmaresults.dir}/metadata.emma" merge="false">
+				<filter value="+vehicle.*" />
+			</instr>
+		</emma>
+
+		<junit dir="${testreport.dir}" maxmemory="512m" failureproperty="test.failure" printSummary="withOutAndErr" fork="true" showoutput="yes" forkmode="once" haltonerror="true">
+			<jvmarg value="-Demma.coverage.out.file=${emmaresults.dir}/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=false" />
+			<formatter type="plain" />
+			<classpath>
+				<pathelement location="${out.instr.dir}" />
+				<path refid="run.classpath" />
+				<path refid="emma.lib" />
+			</classpath>
+			<classpath location="${loggingutil.dir}/bin" />
+			<classpath location="${aspectj.lib}/aspectjlib.jar" />
+			<classpath location="${aspectj.lib}/aspectjrt.jar" />
+			<classpath location="${aspectj.lib}/aspectjweaver.jar" />
+			<classpath location="${spring.jar}" />
+			<classpath location="${spring.lib}/jakarta-commons/commons-logging.jar" />
+			<classpath location="${spring.lib}/log4j/log4j-1.2.13.jar" />
+			<classpath location="${base.dir}/bin/" />
+			<batchtest todir="${testreport.dir}">
+				<fileset dir="${base.dir}/bin/">
+					<include name="**/*Test.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<emma enabled="${emma.enabled}">
+			<report sourcepath="${src.dir};${test.dir}">
+				<fileset dir="${emmaresults.dir}">
+					<include name="*.emma" />
+				</fileset>
+
+				<txt outfile="${emmaresults.dir}/coverage.txt" />
+				<html outfile="${emmaresults.dir}/coverage.html" />
+			</report>
+		</emma>
+
+		<delete dir="${out.instr.dir}" />
+	</target>
+
+</project>

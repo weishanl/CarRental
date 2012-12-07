@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//spring//dtd bean//en" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+	<bean id="ratePlanDao" class="vehicle.integration.inmemory.InMemoryRatePlanDao"/>
+	<bean id="rentalAgreementDao" class="vehicle.integration.inmemory.InMemoryRentalAgreementDao"/>
+	<bean id="vehicleDao" class = "vehicle.integration.inmemory.InMemoryVehicleDao"/>
+	<bean id="vehicleTypeDao" class="vehicle.integration.inmemory.InMemoryVehicleTypeDao"/>
+	
+	<bean id="ratePlanInValidStateForUpdateValidator" class="vehicle.validation.RatePlanInValidStateForUpdateValidator"/>
+	
+	<bean id="ratePlanComponent" class="vehicle.component.rateplan.RatePlanComponent">
+		<property name="dao"><ref bean="ratePlanDao"/></property>
+		<property name="ratePlanInValidStateForUpdateValidator"><ref bean="ratePlanInValidStateForUpdateValidator"/></property>
+	</bean>
+	
+	<bean id="rentalAgreementComponent" class="vehicle.component.rentalagreement.RentalAgreementComponent">
+		<property name="dao"><ref bean="rentalAgreementDao"/></property>
+	</bean>
+	
+	<bean id="vehicleComponent" class="vehicle.component.vehicle.VehicleComponent">
+		<property name="dao"><ref bean="vehicleDao"/></property>
+	</bean>
+	
+	<bean id="vehicleTypeComponent" class="vehicle.component.vehicletype.VehicleTypeComponent">
+		<property name="dao"><ref bean="vehicleTypeDao"/></property>
+	</bean>
+	
+
+</beans>
